@@ -1,12 +1,12 @@
 import { Router } from 'express'
 import { check } from 'express-validator'
 import validarCampos from '../middlewares/validar-campos'
-import { verVacantes, crearVacante, actualizarVacante, cambiarEstadoVacante } from '../controllers/vacanteController'
+import { verVacanteFiltrado, crearVacante, actualizarVacante, cambiarEstadoVacante } from '../controllers/vacanteController'
 
 const router = Router()
 
 router.get('/', [
-], verVacantes)
+], verVacanteFiltrado)
 
 router.post('/', [
   check('area', 'El area es obligatrio').notEmpty(),

@@ -1,34 +1,33 @@
-import { Op } from 'sequelize'
 import { Request, Response } from 'express'
 import { Vacante } from '../models/vacante'
-import paginarFiltrado from '../helpers/paginado-filtrado'
 
-export const verVacanteFiltrado = async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
-  const { filtrosLike, filtrosNumber, offset, limite: limit, currentPageNumber } = paginarFiltrado(req.body)
+interface queryParams {
+  limit: string
+  page: string
+}
 
+export const verVacanteFiltrado = async (req: Request<{}, {}, {}, queryParams>, res: Response): Promise<Response<any, Record<string, any>>> => {
+  const { limit, page } = req.query
+  let pagina = parseInt(page)
+  const limite = parseInt(limit)
+  pagina -= 1
+  const offset = (pagina >= 0) ? pagina * limite : 0
   try {
     const { count, rows } = await Vacante.findAndCountAll({
-      where: {
-        [Op.and]: [
-          filtrosLike,
-          filtrosNumber
-        ]
-      },
-      limit,
+      limit: limite,
       offset,
       attributes: {
         exclude: ['createdAt', 'updatedAt']
       }
     })
-
-    const totalPages = Math.ceil(count / limit)
+    const totalPages = Math.ceil(count / limite)
     return res.json({
       message: 'Exito',
       registros: rows,
-      totalPages,
       totalItems: count,
-      currentPageNumber,
-      currentPageSize: rows.length
+      currentPageSize: rows.length,
+      totalPages,
+      currentPageNumber: pagina + 1
     })
   } catch (error) {
     console.log(error)
